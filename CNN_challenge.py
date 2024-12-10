@@ -23,10 +23,10 @@ gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
     
-# tf.config.experimental.set_virtual_device_configuration(
-#     gpus[0],
-#     [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4096)]
-# )
+tf.config.experimental.set_virtual_device_configuration(
+    gpus[0],
+    [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=7064)]
+)
 
     
 # from tensorflow.python.client import device_lib
@@ -113,6 +113,10 @@ def enhanced_model():
         MaxPooling2D((2,2)),
         Dropout(0.4),
         
+        Conv2D(256, (2,2), activation='relu'),
+        BatchNormalization(),
+        Dropout(0.5),
+        
         Flatten(),
         Dense(128, activation='relu'),
         Dropout(0.5),
@@ -123,7 +127,7 @@ def enhanced_model():
 
 
 #Define the model path
-model_path = os.path.join(output_dir, 'cifar10_enhanced_model.h5')
+model_path = os.path.join(output_dir, 'cifar10_enhanced_model_1.h5')
 if os.path.isfile(model_path):
     model = tf.keras.models.load_model(model_path)
     print(f"loaded existing model from {model_path}")
@@ -134,7 +138,7 @@ else:
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
     model.summary()
     
-    history = model.fit(X_train, y_train, epochs=30, batch_size=128, validation_data=(X_test, y_test))
+    history = model.fit(X_train, y_train, epochs=30, batch_size=256, validation_data=(X_test, y_test))
     
     model.save(model_path)
     # Plot the training and validation accuracy over epochs
